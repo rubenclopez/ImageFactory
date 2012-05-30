@@ -1,5 +1,7 @@
+require 'spec_helper'
 require 'active_record'
 require 'logger'
+require 'image_spooler.rb'
 
 class Offer
   attr_accessor :id, :url, :complete
