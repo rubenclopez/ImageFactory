@@ -5,6 +5,8 @@ require "#{Dir.pwd}/lib/image_spooler.rb"
 describe ResizedOffers::Config do
 
   describe "Setting up configurations" do
+    
+
     it "Allows me to configure the spooler" do
       ResizedOffers::Config.set do |conf|
         conf.bulk_count = 10
@@ -13,6 +15,7 @@ describe ResizedOffers::Config do
                        :medium  => "300x300",
                        :large   => "500x500"
                      }
+        conf.image_path = File.join(Dir.pwd, "images")
       end.should be_true
     end
 
@@ -20,7 +23,17 @@ describe ResizedOffers::Config do
       ResizedOffers::Config.database.should eq('lon_qa_test')
       ResizedOffers::Config.bulk_count.should be_equal(10)
       ResizedOffers::Config.sizes.class.should be_eql(Hash)
+      ResizedOffers::Config.image_path.should match("images")
     end
+
+    it "Creates needed folders" do
+      path = ResizedOffers::Config.image_path
+      exists = lambda { File.exists?(path) }
+
+      expect{ResizedOffers::Config.setup_environment}.to change{exists.call}.from(false).to(true)
+      Dir.rmdir(path)
+    end
+
   end
 
   describe "Establishing connection our data" do
@@ -116,14 +129,10 @@ describe ResizedOffersApplication do
   end
 
   it "Downloads the current batch" do
-    @offers.process
+    #@offers.process
   end
 
-
-
-
 end
-
 
 describe Offer do
 

@@ -1,5 +1,6 @@
 require 'classes.rb'
 require 'open-uri'
+require 'fileutils'
 
 ActiveRecord::Base.logger = Logger.new("#{Dir.pwd}/log/db.log")
 
@@ -26,14 +27,17 @@ module ResizedOffers
         :password => "lon_password"
       )
     end
+
+    def self.setup_environment
+      FileUtils.mkdir_p( @image_path )
+    end
+
   end
 end
-
 
 class ResizedOffersApplication
 
   attr_accessor :offers
-
 
   def initialize
     ResizedOffers::Config.set do |conf|
