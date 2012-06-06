@@ -78,6 +78,53 @@ describe ResizedOffers::Config do
 
 end
 
+describe ResizedOffersApplication do
+
+  before do
+    @offers = ResizedOffersApplication.new
+  end
+
+  it "Initializes a new instance properly" do
+    @offers.should be_true
+  end
+
+  it "Make sure that we have fetched records." do
+    @offers.offers.should be_present   
+  end
+
+  it "Returns the next record needed to be processed" do
+    current_record = @offers.next
+    current_record.class.should be_eql(Offer)
+  end
+
+  it "Returns the connect data for an offer record" do
+    current_record = @offers.next
+    current_record.image_url.should include(".jpg")
+  end
+
+  it "Changes our fetched data by shifting our data in the array" do
+    expect { @offers.next }.to change{ @offers.offers.count }.by(-1)
+  end
+
+  it "Downloads an image" do
+    current_record = @offers.next
+    @offers.download(current_record.id, current_record.image_url)
+  end
+
+  it "Gracefully exits when the image cannot be downloaded." do
+    @offers.download(99999999999, "http://www.notfound.com/image.jpg")
+  end
+
+  it "Downloads the current batch" do
+    @offers.process
+  end
+
+
+
+
+end
+
+
 describe Offer do
 
   it "Returns only the records that do not have a joined resized_offer entry." do
