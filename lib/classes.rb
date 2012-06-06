@@ -7,7 +7,11 @@ class Offer < ActiveRecord::Base
   has_one :resized_offer
 
   def self.fetch
-    find(:all, :limit => ResizedOffers::Config::bulk_count).select { |o| o.resized_offer == nil }
+    Offer.find_by_sql("
+                SELECT offers.id, offers.image_url FROM offers
+                LEFT OUTER JOIN resized_offers ON offers.id = resized_offers.offer_id 
+                WHERE resized_offers.id IS NULL
+                LIMIT #{ResizedOffers::Config.bulk_count}")
   end
 end
 

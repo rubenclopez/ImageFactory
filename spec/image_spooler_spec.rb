@@ -15,7 +15,10 @@ describe ResizedOffers::Config do
                        :medium  => "300x300",
                        :large   => "500x500"
                      }
-        conf.image_path = File.join(Dir.pwd, "images")
+        conf.image_path = File.join(Dir.pwd, "images_test")
+
+        conf.s3_access_key_id     = 'AKIAJTGQEDLIIRNGUA4A'
+        conf.s3_secret_access_key = '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'
       end.should be_true
     end
 
@@ -24,6 +27,8 @@ describe ResizedOffers::Config do
       ResizedOffers::Config.bulk_count.should be_equal(10)
       ResizedOffers::Config.sizes.class.should be_eql(Hash)
       ResizedOffers::Config.image_path.should match("images")
+      ResizedOffers::Config.s3_access_key_id.should eq('AKIAJTGQEDLIIRNGUA4A')
+      ResizedOffers::Config.s3_secret_access_key.should eq('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')
     end
 
     it "Creates needed folders" do
@@ -39,6 +44,19 @@ describe ResizedOffers::Config do
   describe "Establishing connection our data" do
    it "Establishes connection with the db" do
      ActiveRecord::Base.connection.should_not raise_error(ActiveRecord::ConnectionNotEstablished)
+   end
+
+   it "Establishes connection with the Amazon S3 servers" do
+     AWS::S3::Base.should be_connected
+   end
+   
+   it "Finds our offer_images bucket" do
+     @offer_images = AWS::S3::Bucket.find("offer_images").should_not raise_error(AWS::S3::NoSuchBucket)
+   end
+
+   it "Uploads to S3 successfully" do
+     upload = AWS::S3::S3Object.store('images/dummy_resized_test_small.jpg', open(File.join(Dir.pwd, 'images/dummy_resized_test_small.jpg')), 'offer_images')
+     upload.response.code.should eql('200')
    end
 
    it "Maps our joined table to an object" do
@@ -66,29 +84,6 @@ describe ResizedOffers::Config do
       offers.select { |offer| offer.resized_offer != nil }.should be_empty
     end
 	end
-#
-#  describe "#pop" do
-#    before do
-#      @records = OfferImages.init
-#    end
-#
-#    it "Returns the next record needed to be processed" do
-#      current_record = @records.next
-#      current_record.class.should be_eql(Offer)
-#    end
-#
-#    it "Returns the connect data for an offer record" do
-#      current_record = @records.next
-#      current_record.url.should include(".jpg")
-#    end
-#
-#    it "Changes our fetched data by shifting our data in the array" do
-#      expect { @records.next }.to change{ @records.offers.count }.by(-1)
-#    end
-#
-#    #it "Sets the recddddord on the db to complete"
-#  end
-
 end
 
 describe ResizedOffersApplication do
@@ -119,9 +114,23 @@ describe ResizedOffersApplication do
     expect { @offers.next }.to change{ @offers.offers.count }.by(-1)
   end
 
+  it "Resizes an image" do
+    current_record = @offers.next
+    @offers.resize("dummy_resized_test", current_record.image_url)
+  end
+
+  it "Gracefully exits from the resizing method if image cannot be resized." do
+    @offers.resize("image_will_not_be_found", "http://www.blahdotdot.com/notfound.jpg")
+  end
+
+  it "Batch resizes images in the offers variable." do
+    #@offers.batch_resize("resized_test")
+    @offers.batch_process
+  end
+
   it "Downloads an image" do
     current_record = @offers.next
-    @offers.download(current_record.id, current_record.image_url)
+    @offers.download("dummy_download_test", current_record.image_url)
   end
 
   it "Gracefully exits when the image cannot be downloaded." do
@@ -131,6 +140,7 @@ describe ResizedOffersApplication do
   it "Downloads the current batch" do
     #@offers.process
   end
+
 
 end
 
