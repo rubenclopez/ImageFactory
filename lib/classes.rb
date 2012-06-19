@@ -1,20 +1,14 @@
-require 'spec_helper'
+#require 'spec_helper'
 require 'active_record'
 require 'logger'
-require 'image_spooler.rb'
+require File.join(Dir.pwd, 'lib/image_spooler.rb')
 
-class Offer < ActiveRecord::Base
-  has_one :resized_offer
+class Image < ActiveRecord::Base
+  has_one  :resized_image
+  scope :unresized, includes(:resized_image).where("resized_images.id" => nil).where("resized_images.failures" => nil).where("images.id > 500000")
 
-  def self.fetch
-    Offer.find_by_sql("
-                SELECT offers.id, offers.image_url FROM offers
-                LEFT OUTER JOIN resized_offers ON offers.id = resized_offers.offer_id 
-                WHERE resized_offers.id IS NULL
-                LIMIT #{ResizedOffers::Config.bulk_count}")
-  end
 end
 
-class ResizedOffer < ActiveRecord::Base
-  belongs_to :offer
+class ResizedImage < ActiveRecord::Base
+  belongs_to :image
 end
