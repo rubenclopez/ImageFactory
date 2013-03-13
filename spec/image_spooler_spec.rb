@@ -31,8 +31,8 @@ describe ResizedImages::Config do
       }
       conf.s3_bucket_name       = 'offer_images'
       conf.s3_bucket_size       = 10000
-      conf.s3_access_key_id     = 'AKIAJTGQEDLIIRNGUA4A'
-      conf.s3_secret_access_key = '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'
+      conf.s3_access_key_id     = 'AKIAJTGQEDLIIRNGUA4AINVALID'
+      conf.s3_secret_access_key = '3LiaipCYayEfcwrq+2doAm25Pd7521+IECFKvRT8INVALID'
     end
   end
 
@@ -41,8 +41,8 @@ describe ResizedImages::Config do
     ResizedImages::Config.bulk_count.should be_equal(10)
     ResizedImages::Config.sizes.class.should be_eql(Hash)
     ResizedImages::Config.image_path.should match("images")
-    ResizedImages::Config.s3_access_key_id.should eq('AKIAJTGQEDLIIRNGUA4A')
-    ResizedImages::Config.s3_secret_access_key.should eq('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')
+    ResizedImages::Config.s3_access_key_id.should eq('AKIAJTGQEDLIIRNGUA4AINVALID')
+    ResizedImages::Config.s3_secret_access_key.should eq('3LiaipCYayEfcwrq+2doAm25Pd7521+IECFKvRT8INVALID')
     # TODO: Add validation for the new variables.
   end
 

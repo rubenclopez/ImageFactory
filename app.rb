@@ -5,9 +5,9 @@ require File.join(Dir.pwd, 'lib/image_spooler.rb')
 
 ResizedImages::Config.set do |conf|
   conf.bulk_count  = 30
-  conf.host        = '173.45.225.93'
-  conf.database    = 'lon'
-  conf.credentials = { :username => "remote", :password => "lonch1cag0" }
+  conf.host        = '127.0.0.1'
+  conf.database    = 'foo'
+  conf.credentials = { :username => "foo", :password => "bar" }
   conf.image_path  = File.join(Dir.pwd, "images/")
   conf.log_file    = File.join(Dir.pwd, "log/status.log")
   conf.sizes = { 
@@ -22,10 +22,10 @@ ResizedImages::Config.set do |conf|
       :extent  => '66x66'
     }
   }
-  conf.s3_bucket_name          = "LON"
+  conf.s3_bucket_name          = "baz"
   conf.s3_bucket_size          = 10000
-  conf.s3_access_key_id     = "AKIAJ3POCSWLIPFANUXQ"
-  conf.s3_secret_access_key = "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"
+  conf.s3_access_key_id     = "INVALIDID"
+  conf.s3_secret_access_key = "INVALIDKEY"
 end
 
 

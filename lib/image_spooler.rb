@@ -18,14 +18,15 @@ class ResizedImagesApplication
   end
 
   def batch_process(file_name_prefix = nil)
-    resized  = batch_resize(file_name_prefix)
-    uploaded = batch_upload_to_s3(resized)
+    resized   = batch_resize(file_name_prefix)
+    uploaded  = batch_upload_to_s3(resized)
     completed = set_flag_for_completed_records(uploaded)
+
     ResizedImages::Config.cleanup(completed)
   end
 
   def batch_resize(file_name_prefix = nil)
-    records = @images.map do |image|
+    @images.map do |image|
       file_name = file_name_prefix == nil ? image.id : "#{file_name_prefix}_#{image.id}"
       [image.id, resize(file_name, image.url)]
     end
@@ -63,10 +64,10 @@ class ResizedImagesApplication
       response = "OK"
       begin
         ResizedImages::Config.sizes.each do |suffix, size|
-          file    = File.join(Dir.pwd, "images", "#{imageid}_#{suffix.to_s}.jpg")
-          s3_path = ResizedImages::Config.generate_s3_path(imageid) 
-          code = AWS::S3::S3Object.store("#{s3_path}/#{suffix.to_s}.jpg", open(file), ResizedImages::Config.s3_bucket_name, :access => :public_read).response.code
-          response = 'ER' if code != '200'
+          file      = File.join(Dir.pwd, "images", "#{imageid}_#{suffix.to_s}.jpg")
+          s3_path   = ResizedImages::Config.generate_s3_path(imageid) 
+          code      = AWS::S3::S3Object.store("#{s3_path}/#{suffix.to_s}.jpg", open(file), ResizedImages::Config.s3_bucket_name, :access => :public_read).response.code
+          response  = 'ER' if code != '200'
         end
       rescue Exception => e
         response = 'ER'
